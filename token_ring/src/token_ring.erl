@@ -2,21 +2,41 @@
 %%% @author Daniel Borcard, daniel.borcard@unifr.ch
 %%% @copyright (C) 2021, UNIFR
 %%% @doc
-%%%
+%%% Inspired from https://github.com/everpeace/ring-benchmark
 %%% @end
 %%% Created : 08. Oct 2021 10:21
 %%%-------------------------------------------------------------------
 -module(token_ring).
 -author("Daniel Borcard").
--export([start/2]).
+-export([start/0]).
+-define(DELAY, 300).
+
+pause(Factor) ->
+  timer:sleep(round(rand:uniform(Factor))).
 
 % Ring Initialization
+start() ->
+  start(12,3).
+
 start(N, M) ->
   io:format("[main(~p)] constructing ~p nodes ring...~n", [self(), N]),
   Root = root_start(0, self(), M),
   First = create_nodes(1, N-1, Root),
   Root ! {link, First},
-  Root.
+  send_token(Root,M),
+  receive
+    ended -> void
+  end,
+  Root ! {self(), kill}.
+
+send_token(_, 0) ->
+  io:format("All token have been send. ~n", []);
+
+send_token(Destination, M) ->
+  io:format("[main(~p)] sending the token \"~p\".~n", [self(), M]),
+  Destination ! {self(), token},
+  pause(?DELAY),
+  send_token(Destination, M-1).
 
 create_nodes(_, 0, Root)-> Root;
 create_nodes(N, N, Root)->
@@ -85,7 +105,6 @@ listen_tokens(Name, Main, Next, M) ->
   % rounding the token.
     {I, Token} when I =:= M-1 ->
       io:format("[~p(~p)] token \"~p\" reaches root ~p times.~n", [Name, self(), Token, M]),
-      io:format("[~p(~p)] report the finish of benchmark to main(~p)~n", [Name, self(), Main]),
       Main ! ended,
       listen_tokens(Name, Main, Next, M);
     {I, Token} ->
