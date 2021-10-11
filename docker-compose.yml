@@ -1,26 +1,27 @@
 version: "3.3" # optional since v1.27.0
 services:
-  producer:
-    networks:
-      - producer_consumer
-    image: wichtf/producer
-    container_name: producer.com # also acts as hostname
-  consumer:
-    networks:
-      - producer_consumer
-    image: wichtf/consumer
-    container_name: consumer.com # also acts as hostname
-  buffer:
-    depends_on:
-      - consumer
-      - producer
-    networks:
-      - producer_consumer
-    image: wichtf/buffer
-    container_name: buffer.com # also acts as hostname
-    environment:
-      - consumer=consumer@consumer.com
-      - producer=producer@producer.com
+
+#  producer:
+#    networks:
+#      - producer_consumer
+#    image: wichtf/producer
+#    container_name: producer.com # also acts as hostname
+#  consumer:
+#    networks:
+#      - producer_consumer
+#    image: wichtf/consumer
+#    container_name: consumer.com # also acts as hostname
+#  buffer:
+#    depends_on:
+#      - consumer
+#      - producer
+#    networks:
+#      - producer_consumer
+#    image: wichtf/buffer
+#    container_name: buffer.com # also acts as hostname
+#    environment:
+#      - consumer=consumer@consumer.com
+#      - producer=producer@producer.com
 
   token_ring:
     networks:
